@@ -19,7 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -70,20 +74,33 @@ public ResponseEntity<Resource> encryptFile(@RequestPart("file") MultipartFile f
 
 
     @PostMapping("/decrypt")
-    public String decryptFile(@RequestParam("file") MultipartFile file, @RequestParam("key") String key){
-        try{
-            //convert multipartFile to File
-            File encryptedFile = convertMultipartFileToFile(file);
-            File decryptedFile = new File(encryptedFile.getParent(),"decrypted_" + encryptedFile.getName());
+public ResponseEntity<byte[]> decryptFile(@RequestParam("file") MultipartFile file, @RequestParam("key") String key) {
+    try {
+        // Convert MultipartFile to File
+        File encryptedFile = convertMultipartFileToFile(file);
+        File decryptedFile = new File(encryptedFile.getParent(), "decrypted_" + encryptedFile.getName().replace(".enc", ".pdf"));
 
-            //Decrypt the file
-            fileEncryptionServices.decryptFile(encryptedFile.getAbsolutePath(), decryptedFile.getAbsolutePath(), key);
+        // Decrypt the file
+        fileEncryptionServices.decryptFile(encryptedFile.getAbsolutePath(), decryptedFile.getAbsolutePath(), key);
 
-            return "File Decrypted Successfully";
-        }catch(Exception e){
-            return "Error decrypting file: " + e.getMessage();
-        }
+        // Convert decrypted file to byte array
+        byte[] fileContent = Files.readAllBytes(decryptedFile.toPath());
+
+        // Return the decrypted file with correct headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename(decryptedFile.getName())
+                .build());
+
+        return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(("Error decrypting file: " + e.getMessage()).getBytes());
     }
+}
+
 
     private File convertMultipartFileToFile(MultipartFile file) throws Exception {
         File convFile = new File(System.getProperty("java.io.tmpdir") + "/" + file.getOriginalFilename());
