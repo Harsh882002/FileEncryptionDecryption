@@ -16,7 +16,7 @@ RUN chmod +x ./mvnw
 
 # Build and package the application using the Maven 
 RUN ./mvnw clean package -DskipTests
-
+   
 # Expose the port your application runs on
 EXPOSE 8080
 
