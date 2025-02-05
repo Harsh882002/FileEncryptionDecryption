@@ -3,7 +3,7 @@ FROM openjdk:21-jdk-slim
 
 # Set the working directory inside the container
 WORKDIR /app
-
+ 
 # Copy your Maven wrapper and pom.xml
 COPY mvnw ./
 COPY .mvn .mvn
@@ -14,7 +14,7 @@ COPY . .
 # Ensure the Maven wrapper is executable
 RUN chmod +x ./mvnw
 
-# Build and package the application using the Maven wrapper
+# Build and package the application using the Maven 
 RUN ./mvnw clean package -DskipTests
 
 # Expose the port your application runs on
