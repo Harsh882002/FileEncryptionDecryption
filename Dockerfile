@@ -21,4 +21,4 @@ RUN ./mvnw clean package -DskipTests
 EXPOSE 8080
 
 # Run the application (replace with your actual JAR file name)
-CMD ["java", "-jar", "target/FileEncrypDecrypApplication-1.0-SNAPSHOT.jar"]
+CMD ["java", "-jar", "target/fileEncrypDecryp-0.0.1-SNAPSHOT.jar"]
